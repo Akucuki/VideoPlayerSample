@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
+import com.akucuki.videoplayersample.data.local.InstantConverter
 import java.time.Instant
 
 @Entity(tableName = "videos_fetch_info_table")

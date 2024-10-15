@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.akucuki.videoplayersample.data.VideoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,13 +19,15 @@ class HomeScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
     val state = handle.getStateFlow(STATE, HomeState())
-    val events = Channel<HomeEvents>(Channel.UNLIMITED)
+    private val _events = Channel<HomeEvents>(Channel.UNLIMITED)
+    val events = _events.receiveAsFlow()
 
     init {
 
         viewModelScope.launch {
             handle[STATE] = state.value.copy(isLoading = true)
             try {
+                // TODO pagination
                 val videoDataResult = repository.fetchVideoData()
                 videoDataResult.onSuccess { data ->
                     handle[STATE] = state.value.copy(
@@ -33,7 +36,7 @@ class HomeScreenViewModel @Inject constructor(
                 }
                 videoDataResult.onFailure { throwable ->
                     // TODO state machine with user-friendly messages
-                    events.trySend(
+                    _events.trySend(
                         HomeEvents.ShowToast(
                             throwable.message ?: throwable.stackTraceToString()
                         )
@@ -41,7 +44,7 @@ class HomeScreenViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 // TODO state machine with user-friendly messages
-                events.trySend(HomeEvents.ShowToast(e.message ?: e.stackTraceToString()))
+                _events.trySend(HomeEvents.ShowToast(e.message ?: e.stackTraceToString()))
             }
             handle[STATE] = state.value.copy(isLoading = false)
         }
@@ -56,5 +59,9 @@ class HomeScreenViewModel @Inject constructor(
                 itemsData = itemsData
             )
         }
+    }
+
+    fun onVideoClick(id: Int) {
+        _events.trySend(HomeEvents.NavigateToPlayer(id))
     }
 }

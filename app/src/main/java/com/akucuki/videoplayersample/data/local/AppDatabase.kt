@@ -3,7 +3,6 @@ package com.akucuki.videoplayersample.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.akucuki.videoplayersample.data.local.model.InstantConverter
 import com.akucuki.videoplayersample.data.local.model.LocalVideoData
 import com.akucuki.videoplayersample.data.local.model.LocalVideoFetchInfo
 
