@@ -1,4 +1,4 @@
-package com.akucuki.videoplayersample
+package com.akucuki.videoplayersample.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -12,8 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.akucuki.videoplayersample.ui.screens.home.HomeScreen
-import com.akucuki.videoplayersample.ui.theme.VideoPlayerSampleTheme
+import com.akucuki.videoplayersample.app.theme.VideoPlayerSampleTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

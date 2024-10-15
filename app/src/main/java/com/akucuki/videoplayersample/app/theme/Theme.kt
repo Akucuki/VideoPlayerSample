@@ -1,4 +1,4 @@
-package com.akucuki.videoplayersample.ui.theme
+package com.akucuki.videoplayersample.app.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
