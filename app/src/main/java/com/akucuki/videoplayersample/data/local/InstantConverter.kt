@@ -1,4 +1,4 @@
-package com.akucuki.videoplayersample.data.local.model
+package com.akucuki.videoplayersample.data.local
 
 import androidx.room.TypeConverter
 import java.time.Instant

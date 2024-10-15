@@ -1,5 +1,6 @@
 package com.akucuki.videoplayersample.ui.screens.home
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
@@ -49,6 +50,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.imageLoader
@@ -56,21 +60,30 @@ import coil3.request.transitionFactory
 import coil3.transition.CrossfadeTransition
 import com.akucuki.videoplayersample.R
 import com.akucuki.videoplayersample.app.theme.Gray
-import kotlinx.coroutines.channels.consumeEach
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, viewModel: HomeScreenViewModel = hiltViewModel()) {
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    viewModel: HomeScreenViewModel = hiltViewModel(),
+    onNavigateToVideoWithId: (Int) -> Unit
+) {
     val state by viewModel.state.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
     val imageLoader = LocalContext.current.imageLoader.newBuilder()
         .transitionFactory(CrossfadeTransition.Factory())
         .build()
 
     val context = LocalContext.current
-    LaunchedEffect(Unit) {
-        viewModel.events.consumeEach { event ->
-            when (event) {
-                is HomeEvents.ShowToast -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+    LaunchedEffect(lifecycleOwner.lifecycle) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is HomeEvents.ShowToast -> {
+                        Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    }
+                    is HomeEvents.NavigateToPlayer -> {
+                        onNavigateToVideoWithId(event.id)
+                    }
                 }
             }
         }
@@ -84,13 +97,19 @@ fun HomeScreen(modifier: Modifier = Modifier, viewModel: HomeScreenViewModel = h
             bottom = 10.dp
         )
     }
-
     LazyColumn(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(color = Gray),
         contentPadding = WindowInsets.systemBars.add(additionalContentInsets).asPaddingValues(),
     ) {
+        if (state.isLoading) {
+            item {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(modifier = Modifier.size(80.dp), color = Color.Black)
+                }
+            }
+        }
         items(items = state.itemsData, key = { it.id }) {
             VideoCard(
                 title = it.title,
@@ -99,7 +118,11 @@ fun HomeScreen(modifier: Modifier = Modifier, viewModel: HomeScreenViewModel = h
                 imageUrl = it.thumbnailUrl,
                 isExpanded = it.isExpanded,
                 onExpandClick = { viewModel.onCardExpandClick(it.id) },
-                imageLoader = imageLoader
+                imageLoader = imageLoader,
+                onCardClick = {
+                    Log.d("vitalik", "trying to propagate event to the viewmodel")
+                    viewModel.onVideoClick(it.id)
+                }
             )
         }
     }
@@ -114,7 +137,8 @@ fun VideoCard(
     imageUrl: String?,
     isExpanded: Boolean,
     onExpandClick: () -> Unit,
-    imageLoader: ImageLoader
+    imageLoader: ImageLoader,
+    onCardClick: () -> Unit
 ) {
     val roundedCornerShape20 = remember { RoundedCornerShape(10) }
     val arrowIconRotationState by animateFloatAsState(
@@ -127,13 +151,13 @@ fun VideoCard(
     }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .animateContentSize(animationSpec = tween(durationMillis = 500))
             .padding(top = 10.dp),
         shape = roundedCornerShape20,
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        onClick = { if (isExpandable) onExpandClick() }
+        onClick = onCardClick
     ) {
         Row(
             modifier = Modifier

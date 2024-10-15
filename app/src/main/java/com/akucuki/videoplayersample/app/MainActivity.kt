@@ -4,15 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.akucuki.videoplayersample.ui.screens.home.HomeScreen
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.akucuki.videoplayersample.app.theme.VideoPlayerSampleTheme
+import com.akucuki.videoplayersample.ui.screens.home.HomeScreen
+import com.akucuki.videoplayersample.ui.screens.player.PlayerScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -21,31 +19,25 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val navController = rememberNavController()
             VideoPlayerSampleTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    Greeting(
-//                        name = "Android",
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
-                    HomeScreen(modifier = Modifier.consumeWindowInsets(innerPadding))
+                NavHost(navController, startDestination = Destination.Home) {
+                    composable<Destination.Home> {
+                        HomeScreen(
+                            onNavigateToVideoWithId = {
+                                navController.navigate(route = Destination.Player(it))
+                            }
+                        )
+                    }
+                    composable<Destination.Player> {
+                        val args = it.toRoute<Destination.Player>()
+                        PlayerScreen(
+                            targetVideoId = args.id,
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    VideoPlayerSampleTheme {
-        Greeting("Android")
     }
 }
