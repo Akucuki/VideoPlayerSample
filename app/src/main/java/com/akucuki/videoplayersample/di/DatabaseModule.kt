@@ -2,7 +2,7 @@ package com.akucuki.videoplayersample.di
 
 import android.content.Context
 import androidx.room.Room
-import com.akucuki.videoplayersample.data.local.AppDatabase
+import com.akucuki.videoplayersample.core.data.local.AppDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

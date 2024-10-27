@@ -1,7 +1,7 @@
 package com.akucuki.videoplayersample.di
 
 import com.akucuki.videoplayersample.app.BASE_URL
-import com.akucuki.videoplayersample.data.remote.VideoService
+import com.akucuki.videoplayersample.core.data.remote.VideoService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
